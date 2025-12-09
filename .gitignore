@@ -1,0 +1,19 @@
+# Ignore node_modules
+node_modules/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thumbs.db.DS_Store# Optional: ignore OS-specific filesbuild/dist/# Optional: ignore build output.env.*.envyarn-error.log*yarn-debug.log*npm-debug.log*# Optional: ignore log files and environment files
