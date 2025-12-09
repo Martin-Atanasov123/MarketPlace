@@ -1,0 +1,87 @@
+// Sample listings data
+export const seedListings = [
+  {
+    title: "iPhone 14 Pro - Excellent Condition",
+    description: "Barely used iPhone 14 Pro, 256GB, Space Black. Includes original box, charger, and case. No scratches, perfect working condition.",
+    price: 899,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1678652197950-54cc3eb22a2a?w=500&q=80",
+  },
+  {
+    title: "2019 Honda Civic - Low Mileage",
+    description: "Reliable and fuel-efficient Honda Civic with only 35,000 miles. Regular maintenance, clean title, single owner. Great for daily commute.",
+    price: 18500,
+    category: "Vehicles",
+    imageUrl: "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=500&q=80",
+  },
+  {
+    title: "Modern 2BR Apartment Downtown",
+    description: "Beautiful 2-bedroom apartment in the heart of downtown. Recently renovated, hardwood floors, stainless steel appliances. Great location near shops and restaurants.",
+    price: 1800,
+    category: "Real Estate",
+    imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80",
+  },
+  {
+    title: "Vintage Oak Dining Table Set",
+    description: "Stunning solid oak dining table with 6 matching chairs. Perfect for family dinners. Well-maintained, minor wear consistent with age.",
+    price: 450,
+    category: "Furniture",
+    imageUrl: "https://images.unsplash.com/photo-1617098900591-3f90928e8c54?w=500&q=80",
+  },
+  {
+    title: "MacBook Pro 16\" M2 - Like New",
+    description: "2023 MacBook Pro 16-inch with M2 Max chip, 32GB RAM, 1TB SSD. Used for only 3 months. Includes original packaging and accessories.",
+    price: 2400,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80",
+  },
+  {
+    title: "Designer Winter Coat - Size M",
+    description: "Luxury winter coat in excellent condition. Warm, stylish, and perfect for cold weather. Dry cleaned and ready to wear.",
+    price: 180,
+    category: "Clothing",
+    imageUrl: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500&q=80",
+  },
+  {
+    title: "Gaming PC - High Performance",
+    description: "Custom-built gaming PC with RTX 4070, Intel i7-13700K, 32GB RAM, 2TB NVMe SSD. Runs all modern games at max settings. Cable management and RGB included.",
+    price: 1650,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=500&q=80",
+  },
+  {
+    title: "Leather Sofa Set - 3 Seater",
+    description: "Genuine leather sofa in great condition. Comfortable and elegant. Non-smoking home. Minor signs of use but well maintained.",
+    price: 650,
+    category: "Furniture",
+    imageUrl: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80",
+  },
+  {
+    title: "Mountain Bike - Trek X-Caliber",
+    description: "Trek X-Caliber 8 mountain bike. Perfect for trails and off-road adventures. Recently serviced, new tires. Selling due to relocation.",
+    price: 720,
+    category: "Other",
+    imageUrl: "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=500&q=80",
+  },
+  {
+    title: "Vintage Vinyl Record Collection",
+    description: "Collection of 50+ classic rock and jazz vinyl records from the 60s-80s. All in good playing condition. Includes Beatles, Pink Floyd, Miles Davis, and more.",
+    price: 250,
+    category: "Other",
+    imageUrl: "https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=500&q=80",
+  },
+  {
+    title: "Electric Scooter - Xiaomi Pro 2",
+    description: "Xiaomi Mi Electric Scooter Pro 2. Max speed 25km/h, 45km range. Great for commuting. Barely used, includes charger and lock.",
+    price: 380,
+    category: "Vehicles",
+    imageUrl: "https://images.unsplash.com/photo-1594718701842-f13f9dbd2577?w=500&q=80",
+  },
+  {
+    title: "Smart Watch - Samsung Galaxy Watch 5",
+    description: "Samsung Galaxy Watch 5, 44mm. All health tracking features, GPS, waterproof. Excellent battery life. Comes with extra bands.",
+    price: 220,
+    category: "Electronics",
+    imageUrl: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500&q=80",
+  }
+];

@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "user1",
+    "email": "peter@abv.bg",
+    "password": "123456",
+    "username": "Peter",
+    "_createdOn": 1700352000000
+  },
+  {
+    "_id": "user2",
+    "email": "george@abv.bg",
+    "password": "123456",
+    "username": "George",
+    "_createdOn": 1700265600000
+  },
+  {
+    "_id": "user3",
+    "email": "admin@abv.bg",
+    "password": "admin123",
+    "username": "Admin",
+    "_createdOn": 1700179200000
+  }
+]

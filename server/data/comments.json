@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "c1",
+    "listingId": "1",
+    "text": "Is the price negotiable?",
+    "_ownerId": "user2",
+    "author": "George",
+    "_createdOn": 1701400000000
+  },
+  {
+    "_id": "c2",
+    "listingId": "1",
+    "text": "Can you ship to Plovdiv?",
+    "_ownerId": "user3",
+    "author": "Admin",
+    "_createdOn": 1701410000000
+  },
+  {
+    "_id": "c3",
+    "listingId": "2",
+    "text": "What's the fuel consumption?",
+    "_ownerId": "user1",
+    "author": "Peter",
+    "_createdOn": 1701320000000
+  },
+  {
+    "_id": "c4",
+    "listingId": "4",
+    "text": "Does it come with the original charger?",
+    "_ownerId": "user1",
+    "author": "Peter",
+    "_createdOn": 1701150000000
+  },
+  {
+    "_id": "c5",
+    "listingId": "6",
+    "text": "Would you trade for Xbox Series X?",
+    "_ownerId": "user3",
+    "author": "Admin",
+    "_createdOn": 1700970000000
+  }
+]
