@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { Search, Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
+import { toggleFavorite, isFavorite } from '@/utils/favorites';
 
 const API_URL = 'http://localhost:3030';
 
@@ -61,7 +62,12 @@ const Catalog = () => {
       
       // Ensure data is an array
       if (Array.isArray(data)) {
-        setListings(data);
+        // Ensure all listings have a likes array initialized
+        const listingsWithLikes = data.map(listing => ({
+          ...listing,
+          likes: Array.isArray(listing.likes) ? listing.likes : []
+        }));
+        setListings(listingsWithLikes);
       } else {
         console.error('Invalid data format received:', data);
         setListings([]);
@@ -99,37 +105,22 @@ const Catalog = () => {
     setCurrentPage(1);
   };
 
-  const toggleLike = async (listingId) => {
+  const toggleLike = (listingId) => {
     if (!user) {
       showToast('Please login to like listings', 'error');
       return;
     }
 
     try {
-      const listing = listings.find(l => l._id === listingId);
-      if (!listing) return;
-
-      const likes = listing.likes || [];
-      const isLiked = likes.includes(user._id);
-      const updatedLikes = isLiked
-        ? likes.filter(id => id !== user._id)
-        : [...likes, user._id];
-
-      await fetch(`${API_URL}/data/listings/${listingId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({ ...listing, likes: updatedLikes }),
-      });
-
-      setListings(listings.map(l =>
-        l._id === listingId ? { ...l, likes: updatedLikes } : l
-      ));
-
-      showToast(isLiked ? 'Removed from favorites' : 'Added to favorites', 'success');
+      const wasAdded = toggleFavorite(user._id, listingId);
+      showToast(wasAdded ? 'Added to favorites' : 'Removed from favorites', 'success');
+      
+      // Trigger a re-render by creating new array references
+      // The isLiked check in the render will read from localStorage
+      setListings([...listings]);
+      setFilteredListings([...filteredListings]);
     } catch (error) {
+      console.error('Error toggling favorite:', error);
       showToast('Failed to update favorites', 'error');
     }
   };
@@ -207,7 +198,7 @@ const Catalog = () => {
           <Grid container spacing={3}>
             {currentListings.map((listing) => {
               if (!listing || !listing._id) return null;
-              const isLiked = listing.likes?.includes(user?._id || '');
+              const isLiked = user ? isFavorite(user._id, listing._id) : false;
               return (
                 <Grid item xs={12} sm={6} md={4} key={listing._id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

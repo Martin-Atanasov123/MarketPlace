@@ -17,6 +17,7 @@ import {
   Snackbar
 } from '@mui/material';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
+import { getFavorites, removeFavorite } from '@/utils/favorites';
 
 const API_URL = 'http://localhost:3030';
 
@@ -40,40 +41,51 @@ const Favorites = () => {
     if (!user) return;
 
     try {
-      const response = await fetch(`${API_URL}/data/listings`);
-      const data = await response.json();
+      // Get favorite IDs from localStorage
+      const favoriteIds = getFavorites(user._id);
+      
+      if (favoriteIds.length === 0) {
+        setListings([]);
+        setLoading(false);
+        return;
+      }
 
-      const favorites = data.filter(listing =>
-        listing.likes && listing.likes.includes(user._id)
-      );
+      // Fetch all listings from server
+      const response = await fetch(`${API_URL}/data/listings`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch listings');
+      }
+      
+      const data = await response.json();
+      
+      // Ensure data is an array
+      const listingsArray = Array.isArray(data) ? data : [];
+      
+      // Filter to only show favorites
+      const favorites = listingsArray.filter(listing => {
+        if (!listing || !listing._id) return false;
+        return favoriteIds.includes(listing._id);
+      });
 
       setListings(favorites);
     } catch (error) {
+      console.error('Error fetching favorites:', error);
       showToast('Failed to load favorites', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const removeFavorite = async (listingId) => {
+  const handleRemoveFavorite = (listingId) => {
     if (!user) return;
 
     try {
-      const listing = listings.find(l => l._id === listingId);
-      const updatedLikes = listing.likes.filter(id => id !== user._id);
-
-      await fetch(`${API_URL}/data/listings/${listingId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({ ...listing, likes: updatedLikes }),
-      });
-
+      removeFavorite(user._id, listingId);
+      // Remove from local state
       setListings(listings.filter(l => l._id !== listingId));
       showToast('Removed from favorites', 'success');
     } catch (error) {
+      console.error('Error removing favorite:', error);
       showToast('Failed to remove from favorites', 'error');
     }
   };
@@ -123,7 +135,7 @@ const Favorites = () => {
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
                 <IconButton
                   sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper', '&:hover': { bgcolor: 'background.paper' }, zIndex: 1 }}
-                  onClick={() => removeFavorite(listing._id)}
+                  onClick={() => handleRemoveFavorite(listing._id)}
                 >
                   <Favorite color="error" />
                 </IconButton>

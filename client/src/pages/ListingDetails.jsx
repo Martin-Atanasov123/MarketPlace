@@ -22,6 +22,7 @@ import {
   Snackbar
 } from '@mui/material';
 import { ArrowBack, Edit, Delete, Favorite, FavoriteBorder, Send } from '@mui/icons-material';
+import { toggleFavorite, isFavorite } from '@/utils/favorites';
 
 const API_URL = 'http://localhost:3030';
 
@@ -56,7 +57,13 @@ const ListingDetails = () => {
         throw new Error('Invalid listing data');
       }
       
-      setListing(data);
+      // Ensure likes array is initialized
+      const listingWithLikes = {
+        ...data,
+        likes: Array.isArray(data.likes) ? data.likes : []
+      };
+      
+      setListing(listingWithLikes);
     } catch (error) {
       console.error('Failed to load listing:', error);
       showToast('Failed to load listing', 'error');
@@ -91,31 +98,21 @@ const ListingDetails = () => {
     }
   };
 
-  const toggleLike = async () => {
+  const toggleLike = () => {
     if (!user || !listing) {
       showToast('Please login to like listings', 'error');
       return;
     }
 
     try {
-      const likes = listing.likes || [];
-      const isLiked = likes.includes(user._id);
-      const updatedLikes = isLiked
-        ? likes.filter(id => id !== user._id)
-        : [...likes, user._id];
-
-      await fetch(`${API_URL}/data/listings/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({ ...listing, likes: updatedLikes }),
-      });
-
-      setListing({ ...listing, likes: updatedLikes });
-      showToast(isLiked ? 'Removed from favorites' : 'Added to favorites', 'success');
+      const wasAdded = toggleFavorite(user._id, listing._id);
+      showToast(wasAdded ? 'Added to favorites' : 'Removed from favorites', 'success');
+      
+      // Force re-render - create new object reference so React detects the change
+      // The isLiked check in the render will read from localStorage
+      setListing({ ...listing });
     } catch (error) {
+      console.error('Error toggling favorite:', error);
       showToast('Failed to update favorites', 'error');
     }
   };
@@ -192,7 +189,7 @@ const ListingDetails = () => {
   }
 
   const isOwner = user?._id === listing._ownerId;
-  const isLiked = listing.likes?.includes(user?._id || '');
+  const isLiked = user ? isFavorite(user._id, listing._id) : false;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>

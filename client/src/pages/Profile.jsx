@@ -51,13 +51,21 @@ const Profile = () => {
         body: JSON.stringify({ email }),
       });
 
-      if (!response.ok) throw new Error('Failed to update email');
+      if (!response.ok) {
+        if (response.status === 404 || response.status === 405) {
+          showToast('Email update is not available. Please contact support.', 'error');
+          return;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update email');
+      }
 
-      const updatedUser = { ...user, email };
+      const updatedUserData = await response.json();
+      const updatedUser = { ...user, email: updatedUserData.email };
       updateUser(updatedUser);
       showToast('Email updated successfully!', 'success');
     } catch (error) {
-      showToast('Failed to update email', 'error');
+      showToast(error.message || 'Failed to update email', 'error');
     } finally {
       setLoading(false);
     }
@@ -105,6 +113,11 @@ const Profile = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 404 || response.status === 405) {
+          showToast('Password update is not available. Please contact support.', 'error');
+          setNewPassword('');
+          return;
+        }
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to update password');
       }
