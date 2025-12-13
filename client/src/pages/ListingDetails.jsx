@@ -8,77 +8,57 @@ import {
   Button,
   Card,
   CardContent,
-  CardMedia,
   Chip,
   IconButton,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
   Grid,
   Alert,
-  Snackbar
 } from '@mui/material';
 import { ArrowBack, Edit, Delete, Favorite, FavoriteBorder, Send } from '@mui/icons-material';
 import { toggleFavorite, isFavorite } from '@/utils/favorites';
-
-const API_URL = 'http://localhost:3030';
+import { useListings } from '@/hooks/useListings';
+import { useComments } from '@/hooks/useComments';
+import { useToast } from '@/hooks/useToast';
+import { useDeleteDialog } from '@/hooks/useDeleteDialog';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { DeleteDialog } from '@/components/DeleteDialog';
+import { ListingImage } from '@/components/ListingImage';
+import { Toast } from '@/components/Toast';
 
 const ListingDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [listing, setListing] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  
+  const { fetchListing, deleteListing, loading: listingLoading } = useListings();
+  const { fetchComments, createComment, deleteComment, loading: commentLoading } = useComments();
+  const { showToast, hideToast, toast } = useToast();
+  const { isOpen, openDialog, closeDialog } = useDeleteDialog();
 
   useEffect(() => {
-    fetchListing();
-    fetchComments();
+    loadListing();
+    loadComments();
   }, [id]);
 
-  const fetchListing = async () => {
+  const loadListing = async () => {
     try {
-      const response = await fetch(`${API_URL}/data/listings/${id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data || !data._id) {
-        throw new Error('Invalid listing data');
-      }
-      
-      // Ensure likes array is initialized
-      const listingWithLikes = {
-        ...data,
-        likes: Array.isArray(data.likes) ? data.likes : []
-      };
-      
-      setListing(listingWithLikes);
+      const data = await fetchListing(id);
+      setListing(data);
     } catch (error) {
-      console.error('Failed to load listing:', error);
       showToast('Failed to load listing', 'error');
       setTimeout(() => navigate('/catalog'), 2000);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const fetchComments = async () => {
+  const loadComments = async () => {
     try {
-      const response = await fetch(`${API_URL}/data/comments?where=listingId%3D%22${id}%22`);
-      const data = await response.json();
+      const data = await fetchComments(id);
       setComments(data);
     } catch (error) {
+      // Error is handled in the hook, just log it
       console.error('Failed to load comments');
     }
   };
@@ -87,14 +67,13 @@ const ListingDetails = () => {
     if (!user || !listing) return;
 
     try {
-      await fetch(`${API_URL}/data/listings/${id}`, {
-        method: 'DELETE',
-        headers: { 'X-Authorization': user.accessToken },
-      });
+      await deleteListing(id);
       showToast('Listing deleted successfully', 'success');
       setTimeout(() => navigate('/catalog'), 1000);
     } catch (error) {
-      showToast('Failed to delete listing', 'error');
+      showToast(error.message || 'Failed to delete listing', 'error');
+    } finally {
+      closeDialog();
     }
   };
 
@@ -125,31 +104,13 @@ const ListingDetails = () => {
     }
     if (!newComment.trim()) return;
 
-    setSubmittingComment(true);
     try {
-      const response = await fetch(`${API_URL}/data/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({
-          listingId: id,
-          text: newComment,
-          authorEmail: user.email,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to post comment');
-
-      const comment = await response.json();
+      const comment = await createComment(id, newComment);
       setComments([...comments, comment]);
       setNewComment('');
       showToast('Comment posted!', 'success');
     } catch (error) {
-      showToast('Failed to post comment', 'error');
-    } finally {
-      setSubmittingComment(false);
+      showToast(error.message || 'Failed to post comment', 'error');
     }
   };
 
@@ -157,27 +118,18 @@ const ListingDetails = () => {
     if (!user || user._id !== commentOwnerId) return;
 
     try {
-      await fetch(`${API_URL}/data/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: { 'X-Authorization': user.accessToken },
-      });
+      await deleteComment(commentId);
       setComments(comments.filter(c => c._id !== commentId));
       showToast('Comment deleted', 'success');
     } catch (error) {
-      showToast('Failed to delete comment', 'error');
+      showToast(error.message || 'Failed to delete comment', 'error');
     }
   };
 
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
-  };
+  const loading = listingLoading || commentLoading;
 
-  if (loading) {
-    return (
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography>Loading...</Typography>
-      </Container>
-    );
+  if (loading && !listing) {
+    return <LoadingSpinner />;
   }
 
   if (!listing) {
@@ -206,28 +158,12 @@ const ListingDetails = () => {
           <Grid container spacing={4}>
             {/* Image */}
             <Grid item xs={12} md={6}>
-              <CardMedia
-                component="div"
-                sx={{
-                  height: 400,
-                  bgcolor: 'grey.200',
-                  borderRadius: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {listing.imageUrl ? (
-                  <Box
-                    component="img"
-                    src={listing.imageUrl}
-                    alt={listing.title}
-                    sx={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 1 }}
-                  />
-                ) : (
-                  <Typography color="text.secondary">No image</Typography>
-                )}
-              </CardMedia>
+              <ListingImage 
+                imageUrl={listing.imageUrl} 
+                alt={listing.title} 
+                height={400}
+                borderRadius={1}
+              />
             </Grid>
 
             {/* Details */}
@@ -273,7 +209,7 @@ const ListingDetails = () => {
                     variant="contained"
                     color="error"
                     startIcon={<Delete />}
-                    onClick={() => setDeleteDialogOpen(true)}
+                    onClick={() => openDialog(id)}
                     fullWidth
                   >
                     Delete
@@ -311,9 +247,9 @@ const ListingDetails = () => {
                   type="submit"
                   variant="contained"
                   endIcon={<Send />}
-                  disabled={submittingComment || !newComment.trim()}
+                  disabled={commentLoading || !newComment.trim()}
                 >
-                  {submittingComment ? 'Posting...' : 'Post Comment'}
+                  {commentLoading ? 'Posting...' : 'Post Comment'}
                 </Button>
               </Box>
             ) : (
@@ -356,33 +292,13 @@ const ListingDetails = () => {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Listing</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <DeleteDialog
+        open={isOpen}
+        onClose={closeDialog}
+        onConfirm={handleDelete}
+        title="Delete Listing"
+      />
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };

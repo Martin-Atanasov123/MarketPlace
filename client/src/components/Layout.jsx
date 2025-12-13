@@ -82,7 +82,7 @@ export const Layout = ({ children }) => {
       <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', py: 3, mt: 6 }}>
         <Container>
           <Typography variant="body2" color="text.secondary" align="center">
-            © 2024 MarketPlace - University Project
+            © 2025 MarketPlace - University Project
           </Typography>
         </Container>
       </Box>

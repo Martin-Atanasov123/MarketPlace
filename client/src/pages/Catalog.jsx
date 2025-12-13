@@ -13,34 +13,35 @@ import {
   Card,
   CardContent,
   CardActions,
-  CardMedia,
   Button,
   Chip,
   IconButton,
   InputAdornment,
   Pagination,
-  Alert,
-  Snackbar
 } from '@mui/material';
 import { Search, Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { toggleFavorite, isFavorite } from '@/utils/favorites';
-
-const API_URL = 'http://localhost:3030';
+import { useListings } from '@/hooks/useListings';
+import { useToast } from '@/hooks/useToast';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ListingImage } from '@/components/ListingImage';
+import { Toast } from '@/components/Toast';
+import { LISTING_CATEGORIES } from '@/constants';
 
 const Catalog = () => {
   const [listings, setListings] = useState([]);
   const [filteredListings, setFilteredListings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
   const itemsPerPage = 9;
   const { user } = useAuth();
+  const { fetchListings, loading } = useListings();
+  const { showToast, hideToast, toast } = useToast();
 
   useEffect(() => {
-    fetchListings();
+    loadListings();
   }, []);
 
   useEffect(() => {
@@ -50,34 +51,13 @@ const Catalog = () => {
     }
   }, [searchTerm, selectedCategory, listings]);
 
-  const fetchListings = async () => {
+  const loadListings = async () => {
     try {
-      const response = await fetch(`${API_URL}/data/listings`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Ensure data is an array
-      if (Array.isArray(data)) {
-        // Ensure all listings have a likes array initialized
-        const listingsWithLikes = data.map(listing => ({
-          ...listing,
-          likes: Array.isArray(listing.likes) ? listing.likes : []
-        }));
-        setListings(listingsWithLikes);
-      } else {
-        console.error('Invalid data format received:', data);
-        setListings([]);
-      }
+      const data = await fetchListings();
+      setListings(data);
     } catch (error) {
-      console.error('Failed to load listings:', error);
       showToast('Failed to load listings', 'error');
       setListings([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -125,12 +105,6 @@ const Catalog = () => {
     }
   };
 
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
-  };
-
-  const categories = ['Electronics', 'Vehicles', 'Real Estate', 'Furniture', 'Clothing', 'Other'];
-
   // Pagination logic
   const totalPages = Math.ceil(filteredListings.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -138,11 +112,7 @@ const Catalog = () => {
   const currentListings = filteredListings.slice(startIndex, endIndex);
 
   if (loading) {
-    return (
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography>Loading listings...</Typography>
-      </Container>
-    );
+    return <LoadingSpinner message="Loading listings..." />;
   }
 
   return (
@@ -174,7 +144,7 @@ const Catalog = () => {
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <MenuItem value="all">All Categories</MenuItem>
-            {categories.map(cat => (
+            {LISTING_CATEGORIES.map(cat => (
               <MenuItem key={cat} value={cat}>{cat}</MenuItem>
             ))}
           </Select>
@@ -202,27 +172,7 @@ const Catalog = () => {
               return (
                 <Grid item xs={12} sm={6} md={4} key={listing._id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <CardMedia
-                      component="div"
-                      sx={{
-                        height: 200,
-                        bgcolor: 'grey.200',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      {listing.imageUrl ? (
-                        <Box
-                          component="img"
-                          src={listing.imageUrl}
-                          alt={listing.title}
-                          sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : (
-                        <Typography color="text.secondary">No image</Typography>
-                      )}
-                    </CardMedia>
+                    <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                         <Typography variant="h6" component="h3" noWrap sx={{ flexGrow: 1, mr: 1 }}>
@@ -273,17 +223,7 @@ const Catalog = () => {
         </>
       )}
 
-      {/* Toast Notification */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };

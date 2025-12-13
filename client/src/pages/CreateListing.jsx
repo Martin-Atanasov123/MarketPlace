@@ -14,25 +14,29 @@ import {
   FormControl,
   InputLabel,
   Alert,
-  Snackbar
 } from '@mui/material';
-
-const API_URL = 'http://localhost:3030';
+import { useListings } from '@/hooks/useListings';
+import { useToast } from '@/hooks/useToast';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { validateListingForm } from '@/utils/validation';
+import { Toast } from '@/components/Toast';
+import { LISTING_CATEGORIES, MAX_IMAGE_SIZE } from '@/constants';
 
 const CreateListing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     price: '',
-    category: 'Electronics',
+    category: LISTING_CATEGORIES[0],
     imageUrl: '',
   });
-  const [imagePreview, setImagePreview] = useState('');
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  
+  const { fetchListing, createListing, updateListing, loading } = useListings();
+  const { showToast, hideToast, toast } = useToast();
+  const { imagePreview, handleImageFile, handleImageUrl, setImagePreview } = useImageUpload();
 
   useEffect(() => {
     if (!user) {
@@ -42,50 +46,48 @@ const CreateListing = () => {
     }
 
     if (id) {
-      fetchListing();
+      loadListing();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user, navigate]);
 
-  const fetchListing = async () => {
+  const loadListing = async () => {
+    if (!id || !user) return;
+    
     try {
-      const response = await fetch(`${API_URL}/data/listings/${id}`);
-      const data = await response.json();
+      const data = await fetchListing(id);
 
-      if (data._ownerId !== user?._id) {
+      if (data._ownerId !== user._id) {
         showToast('You can only edit your own listings', 'error');
         navigate('/catalog');
         return;
       }
 
       setFormData({
-        title: data.title,
-        description: data.description,
-        price: data.price.toString(),
-        category: data.category,
+        title: data.title || '',
+        description: data.description || '',
+        price: data.price ? data.price.toString() : '',
+        category: data.category || LISTING_CATEGORIES[0],
         imageUrl: data.imageUrl || '',
       });
       setImagePreview(data.imageUrl || '');
     } catch (error) {
-      showToast('Failed to load listing', 'error');
+      showToast(error.message || 'Failed to load listing', 'error');
       navigate('/catalog');
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5000000) {
-        showToast('Image size should be less than 5MB', 'error');
-        return;
+      try {
+        const base64String = await handleImageFile(file);
+        if (base64String) {
+          setFormData({ ...formData, imageUrl: base64String });
+        }
+      } catch (error) {
+        showToast(error.message || `Image size should be less than ${MAX_IMAGE_SIZE / (1024 * 1024)}MB`, 'error');
       }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setImagePreview(base64String);
-        setFormData({ ...formData, imageUrl: base64String });
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -97,87 +99,42 @@ const CreateListing = () => {
       return;
     }
 
-    // Validate required fields with specific error messages
-    if (!formData.title || !formData.title.trim()) {
-      showToast('Title is required. Please enter a title for your listing.', 'error');
-      return;
-    }
-
-    if (!formData.description || !formData.description.trim()) {
-      showToast('Description is required. Please describe your item.', 'error');
-      return;
-    }
-
-    if (!formData.price || formData.price === '' || isNaN(parseFloat(formData.price))) {
-      showToast('Price is required. Please enter a valid number.', 'error');
+    // Validate form data
+    const validation = validateListingForm(formData);
+    if (!validation.isValid) {
+      showToast(validation.errors[0], 'error');
       return;
     }
 
     const priceValue = parseFloat(formData.price);
-    if (priceValue < 0) {
-      showToast('Price cannot be negative. Please enter a valid price.', 'error');
-      return;
-    }
-
-    if (!formData.category) {
-      showToast('Category is required. Please select a category.', 'error');
-      return;
-    }
-
-    setLoading(true);
 
     try {
-      const payload = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
+      const listingData = {
+        title: formData.title,
+        description: formData.description,
         price: priceValue,
         category: formData.category,
         imageUrl: formData.imageUrl || imagePreview || '',
-        likes: [],
       };
 
-      const url = id ? `${API_URL}/data/listings/${id}` : `${API_URL}/data/listings`;
-      const method = id ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || `Server error (${response.status}). Please try again.`;
-        
-        if (response.status === 401 || response.status === 403) {
-          showToast('Authentication failed. Please log in again.', 'error');
-          setTimeout(() => navigate('/login'), 2000);
-          return;
-        }
-        
-        throw new Error(errorMessage);
+      if (id) {
+        await updateListing(id, listingData);
+        showToast('Listing updated successfully!', 'success');
+      } else {
+        await createListing(listingData);
+        showToast('Listing created successfully!', 'success');
       }
-
-      const result = await response.json();
-      showToast(id ? 'Listing updated successfully!' : 'Listing created successfully!', 'success');
+      
       setTimeout(() => navigate('/my-listings'), 1000);
     } catch (error) {
-      console.error('Error saving listing:', error);
       const errorMsg = error.message || 'Failed to save listing. Please check your connection and try again.';
       showToast(errorMsg, 'error');
-    } finally {
-      setLoading(false);
+      
+      if (error.message?.includes('Authentication failed')) {
+        setTimeout(() => navigate('/login'), 2000);
+      }
     }
   };
-
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
-  };
-
-  const categories = ['Electronics', 'Vehicles', 'Real Estate', 'Furniture', 'Clothing', 'Other'];
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -219,7 +176,7 @@ const CreateListing = () => {
                 label="Category"
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
-                {categories.map(cat => (
+                {LISTING_CATEGORIES.map(cat => (
                   <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                 ))}
               </Select>
@@ -263,7 +220,7 @@ const CreateListing = () => {
                 />
               </Button>
               <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                Max size: 5MB. Supports JPG, PNG, WEBP
+                Max size: {MAX_IMAGE_SIZE / (1024 * 1024)}MB. Supports JPG, PNG, WEBP
               </Typography>
               {imagePreview && (
                 <Box sx={{ mt: 2, textAlign: 'center' }}>
@@ -283,8 +240,9 @@ const CreateListing = () => {
               type="url"
               value={formData.imageUrl}
               onChange={(e) => {
-                setFormData({ ...formData, imageUrl: e.target.value });
-                setImagePreview(e.target.value);
+                const url = e.target.value;
+                setFormData({ ...formData, imageUrl: url });
+                handleImageUrl(url);
               }}
               placeholder="https://example.com/image.jpg"
               sx={{ mb: 3 }}
@@ -313,17 +271,7 @@ const CreateListing = () => {
         </CardContent>
       </Card>
 
-      {/* Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };

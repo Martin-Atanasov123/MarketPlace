@@ -11,18 +11,20 @@ import {
   CardContent,
   Divider,
   Alert,
-  Snackbar
 } from '@mui/material';
-
-const API_URL = 'http://localhost:3030';
+import { useUser } from '@/hooks/useUser';
+import { useToast } from '@/hooks/useToast';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Toast } from '@/components/Toast';
 
 const Profile = () => {
-  const { user, updateUser, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  
+  const { updateEmail, updatePassword, validatePassword, loading } = useUser();
+  const { showToast, hideToast, toast } = useToast();
 
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -40,55 +42,12 @@ const Profile = () => {
     e.preventDefault();
     if (!user) return;
 
-    setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 404 || response.status === 405) {
-          showToast('Email update is not available. Please contact support.', 'error');
-          return;
-        }
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update email');
-      }
-
-      const updatedUserData = await response.json();
-      const updatedUser = { ...user, email: updatedUserData.email };
-      updateUser(updatedUser);
+      await updateEmail(email);
       showToast('Email updated successfully!', 'success');
     } catch (error) {
       showToast(error.message || 'Failed to update email', 'error');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  // Password validation function
-  const validatePassword = (password) => {
-    const errors = [];
-    
-    if (password.length < 6) {
-      errors.push('Password must be at least 6 characters long');
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-    if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-    
-    return errors;
   };
 
   const handleUpdatePassword = async (e) => {
@@ -101,48 +60,18 @@ const Profile = () => {
       return;
     }
 
-    setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/users/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Authorization': user.accessToken,
-        },
-        body: JSON.stringify({ password: newPassword }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 404 || response.status === 405) {
-          showToast('Password update is not available. Please contact support.', 'error');
-          setNewPassword('');
-          return;
-        }
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update password');
-      }
-
+      await updatePassword(newPassword);
       setNewPassword('');
       showToast('Password updated successfully!', 'success');
     } catch (error) {
-      console.error('Password update error:', error);
       showToast(error.message || 'Failed to update password', 'error');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
   };
 
   // Show loading state while checking authentication
   if (authLoading) {
-    return (
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography>Loading...</Typography>
-      </Container>
-    );
+    return <LoadingSpinner />;
   }
 
   // Redirect if not authenticated (handled in useEffect, but show nothing while redirecting)
@@ -252,17 +181,7 @@ const Profile = () => {
         </Card>
       </Box>
 
-      {/* Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };

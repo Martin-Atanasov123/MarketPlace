@@ -10,23 +10,24 @@ import {
   Card,
   CardContent,
   CardActions,
-  CardMedia,
   Chip,
   IconButton,
-  Alert,
-  Snackbar
 } from '@mui/material';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import { getFavorites, removeFavorite } from '@/utils/favorites';
-
-const API_URL = 'http://localhost:3030';
+import { useListings } from '@/hooks/useListings';
+import { useToast } from '@/hooks/useToast';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { ListingImage } from '@/components/ListingImage';
+import { Toast } from '@/components/Toast';
 
 const Favorites = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  
+  const { fetchListings, loading } = useListings();
+  const { showToast, hideToast, toast } = useToast();
 
   useEffect(() => {
     if (!user) {
@@ -34,10 +35,10 @@ const Favorites = () => {
       navigate('/login');
       return;
     }
-    fetchFavorites();
+    loadFavorites();
   }, [user, navigate]);
 
-  const fetchFavorites = async () => {
+  const loadFavorites = async () => {
     if (!user) return;
 
     try {
@@ -46,23 +47,14 @@ const Favorites = () => {
       
       if (favoriteIds.length === 0) {
         setListings([]);
-        setLoading(false);
         return;
       }
 
       // Fetch all listings from server
-      const response = await fetch(`${API_URL}/data/listings`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch listings');
-      }
-      
-      const data = await response.json();
-      
-      // Ensure data is an array
-      const listingsArray = Array.isArray(data) ? data : [];
+      const allListings = await fetchListings();
       
       // Filter to only show favorites
-      const favorites = listingsArray.filter(listing => {
+      const favorites = allListings.filter(listing => {
         if (!listing || !listing._id) return false;
         return favoriteIds.includes(listing._id);
       });
@@ -71,8 +63,6 @@ const Favorites = () => {
     } catch (error) {
       console.error('Error fetching favorites:', error);
       showToast('Failed to load favorites', 'error');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -90,16 +80,8 @@ const Favorites = () => {
     }
   };
 
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
-  };
-
   if (loading) {
-    return (
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography>Loading your favorites...</Typography>
-      </Container>
-    );
+    return <LoadingSpinner message="Loading your favorites..." />;
   }
 
   return (
@@ -139,27 +121,7 @@ const Favorites = () => {
                 >
                   <Favorite color="error" />
                 </IconButton>
-                <CardMedia
-                  component="div"
-                  sx={{
-                    height: 200,
-                    bgcolor: 'grey.200',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {listing.imageUrl ? (
-                    <Box
-                      component="img"
-                      src={listing.imageUrl}
-                      alt={listing.title}
-                      sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <Typography color="text.secondary">No image</Typography>
-                  )}
-                </CardMedia>
+                <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Chip label={listing.category} size="small" sx={{ mb: 1 }} />
                   <Typography variant="h6" gutterBottom noWrap>
@@ -188,17 +150,7 @@ const Favorites = () => {
         </Grid>
       )}
 
-      {/* Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };

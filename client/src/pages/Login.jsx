@@ -12,6 +12,7 @@ import {
   Tab,
   Alert
 } from '@mui/material';
+import { validatePassword } from '@/utils/validation';
 
 const Login = () => {
   const { login, register, user } = useAuth();
@@ -44,25 +45,6 @@ const Login = () => {
     }
   };
 
-  // Password validation function
-  const validatePassword = (password) => {
-    const errors = [];
-    
-    if (password.length < 6) {
-      errors.push('Password must be at least 6 characters long');
-    }
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-    if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-    if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-    
-    return errors;
-  };
 
   const handleRegister = async (e) => {
     e.preventDefault();

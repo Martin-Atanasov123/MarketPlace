@@ -10,29 +10,26 @@ import {
   Card,
   CardContent,
   CardActions,
-  CardMedia,
   Chip,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Alert,
-  Snackbar
 } from '@mui/material';
 import { Add, Edit, Delete, Visibility } from '@mui/icons-material';
-
-const API_URL = 'http://localhost:3030';
+import { useListings } from '@/hooks/useListings';
+import { useToast } from '@/hooks/useToast';
+import { useDeleteDialog } from '@/hooks/useDeleteDialog';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { DeleteDialog } from '@/components/DeleteDialog';
+import { ListingImage } from '@/components/ListingImage';
+import { Toast } from '@/components/Toast';
 
 const MyListings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedListingId, setSelectedListingId] = useState(null);
-  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  
+  const { fetchMyListings, deleteListing, loading } = useListings();
+  const { showToast, hideToast, toast } = useToast();
+  const { isOpen, itemId, openDialog, closeDialog } = useDeleteDialog();
 
   useEffect(() => {
     if (!user) {
@@ -40,58 +37,36 @@ const MyListings = () => {
       navigate('/login');
       return;
     }
-    fetchMyListings();
+    loadMyListings();
   }, [user, navigate]);
 
-  const fetchMyListings = async () => {
+  const loadMyListings = async () => {
     if (!user) return;
 
     try {
-      const response = await fetch(
-        `${API_URL}/data/listings?where=_ownerId%3D%22${user._id}%22`
-      );
-      const data = await response.json();
+      const data = await fetchMyListings();
       setListings(data);
     } catch (error) {
       showToast('Failed to load your listings', 'error');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleDeleteClick = (id) => {
-    setSelectedListingId(id);
-    setDeleteDialogOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!user || !selectedListingId) return;
+    if (!user || !itemId) return;
 
     try {
-      await fetch(`${API_URL}/data/listings/${selectedListingId}`, {
-        method: 'DELETE',
-        headers: { 'X-Authorization': user.accessToken },
-      });
-      setListings(listings.filter(l => l._id !== selectedListingId));
+      await deleteListing(itemId);
+      setListings(listings.filter(l => l._id !== itemId));
       showToast('Listing deleted successfully', 'success');
     } catch (error) {
-      showToast('Failed to delete listing', 'error');
+      showToast(error.message || 'Failed to delete listing', 'error');
     } finally {
-      setDeleteDialogOpen(false);
-      setSelectedListingId(null);
+      closeDialog();
     }
   };
 
-  const showToast = (message, severity) => {
-    setToast({ open: true, message, severity });
-  };
-
   if (loading) {
-    return (
-      <Container sx={{ py: 6, textAlign: 'center' }}>
-        <Typography>Loading your listings...</Typography>
-      </Container>
-    );
+    return <LoadingSpinner message="Loading your listings..." />;
   }
 
   return (
@@ -132,27 +107,7 @@ const MyListings = () => {
           {listings.map((listing) => (
             <Grid item xs={12} sm={6} md={4} key={listing._id}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardMedia
-                  component="div"
-                  sx={{
-                    height: 200,
-                    bgcolor: 'grey.200',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {listing.imageUrl ? (
-                    <Box
-                      component="img"
-                      src={listing.imageUrl}
-                      alt={listing.title}
-                      sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    <Typography color="text.secondary">No image</Typography>
-                  )}
-                </CardMedia>
+                <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Chip label={listing.category} size="small" sx={{ mb: 1 }} />
                   <Typography variant="h6" gutterBottom noWrap>
@@ -186,7 +141,7 @@ const MyListings = () => {
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => handleDeleteClick(listing._id)}
+                      onClick={() => openDialog(listing._id)}
                       color="error"
                     >
                       <Delete />
@@ -199,33 +154,13 @@ const MyListings = () => {
         </Grid>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Listing</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Toast */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={() => setToast({ ...toast, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      <DeleteDialog
+        open={isOpen}
+        onClose={closeDialog}
+        onConfirm={handleDelete}
+        title="Delete Listing"
+      />
+      <Toast toast={toast} onClose={hideToast} />
     </Container>
   );
 };
