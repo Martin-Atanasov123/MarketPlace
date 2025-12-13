@@ -24,7 +24,7 @@ const Home = () => {
                 to="/catalog"
                 endIcon={<ArrowForward />}
               >
-                Browse Listings
+                Browse Catalog
               </Button>
               <Button 
                 variant="outlined" 
@@ -32,7 +32,7 @@ const Home = () => {
                 component={Link} 
                 to="/login"
               >
-                Post Free Ad
+                Post Free 
               </Button>
             </Box>
           </Box>
@@ -53,7 +53,6 @@ const Home = () => {
                     width: 64, 
                     height: 64, 
                     borderRadius: '50%', 
-                    bgcolor: 'primary.light',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -81,7 +80,6 @@ const Home = () => {
                     width: 64, 
                     height: 64, 
                     borderRadius: '50%', 
-                    bgcolor: 'primary.light',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -109,7 +107,6 @@ const Home = () => {
                     width: 64, 
                     height: 64, 
                     borderRadius: '50%', 
-                    bgcolor: 'primary.light',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -147,7 +144,7 @@ const Home = () => {
               component={Link} 
               to="/catalog"
             >
-              Explore Listings
+              Explore Products
             </Button>
           </Box>
         </Container>

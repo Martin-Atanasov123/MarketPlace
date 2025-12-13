@@ -15,6 +15,7 @@ import {
   Person,
   Favorite,
   Logout,
+  ShoppingCart,
   Store
 } from '@mui/icons-material';
 
@@ -52,15 +53,15 @@ export const Layout = ({ children }) => {
                 startIcon={<Add />}
                 sx={{ mx: 1 }}
               >
-                Post Ad
+                Sell
               </Button>
-              <Button color="inherit" component={Link} to="/my-listings" startIcon={<Person />}>
-                My Ads
+              <Button color="inherit" component={Link} to="/my-listings"  startIcon={<ShoppingCart />}>
+                My Product
               </Button>
               <Button color="inherit" component={Link} to="/favorites" startIcon={<Favorite />}>
                 Favorites
               </Button>
-              <Button color="inherit" component={Link} to="/profile">
+              <Button color="inherit" component={Link} to="/profile"startIcon={<Person />}>
                 Profile
               </Button>
               <Button color="inherit" onClick={logout} startIcon={<Logout />}>
@@ -82,7 +83,7 @@ export const Layout = ({ children }) => {
       <Box component="footer" sx={{ borderTop: 1, borderColor: 'divider', py: 3, mt: 6 }}>
         <Container>
           <Typography variant="body2" color="text.secondary" align="center">
-            © 2025 MarketPlace - University Project
+            © 2025 MarketPlace - All rights reserved.
           </Typography>
         </Container>
       </Box>

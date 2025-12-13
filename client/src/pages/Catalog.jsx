@@ -35,7 +35,7 @@ const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 6; // 2 columns × 3 rows = 6 items per page
   const { user } = useAuth();
   const { fetchListings, loading } = useListings();
   const { showToast, hideToast, toast } = useToast();
@@ -170,7 +170,7 @@ const Catalog = () => {
               if (!listing || !listing._id) return null;
               const isLiked = user ? isFavorite(user._id, listing._id) : false;
               return (
-                <Grid item xs={12} sm={6} md={4} key={listing._id}>
+                <Grid item xs={12} sm={6} md={6} key={listing._id}>
                   <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
                     <CardContent sx={{ flexGrow: 1 }}>

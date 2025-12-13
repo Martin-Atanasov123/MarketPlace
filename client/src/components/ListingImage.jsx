@@ -6,8 +6,8 @@ import { Box, Typography, CardMedia } from '@mui/material';
 export const ListingImage = ({ 
   imageUrl, 
   alt = 'Listing image', 
-  height = 200,
-  borderRadius = 0 
+  height = 250,
+  borderRadius = 1
 }) => {
   return (
     <CardMedia
