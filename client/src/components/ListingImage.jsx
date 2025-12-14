@@ -6,7 +6,7 @@ import { Box, Typography, CardMedia } from '@mui/material';
 export const ListingImage = ({ 
   imageUrl, 
   alt = 'Listing image', 
-  height = 250,
+  height = 300,
   borderRadius = 1
 }) => {
   return (
@@ -27,7 +27,7 @@ export const ListingImage = ({
           src={imageUrl}
           alt={alt}
           sx={{ 
-            width: '100%', 
+            width: '350px', 
             height: '100%', 
             objectFit: 'cover', 
             borderRadius 

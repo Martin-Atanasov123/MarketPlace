@@ -106,7 +106,7 @@ const Favorites = () => {
               You haven't saved any favorites yet
             </Typography>
             <Button variant="contained" component={Link} to="/catalog" sx={{ mt: 2 }}>
-              Browse Listings
+              Browse Products
             </Button>
           </CardContent>
         </Card>
@@ -114,7 +114,7 @@ const Favorites = () => {
         <Grid container spacing={3}>
           {listings.map((listing) => (
             <Grid item xs={12} sm={6} md={4} key={listing._id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <Card sx={{ height: '100%', width: '1150px',display: 'flex', flexDirection: 'row', position: 'relative' }}>
                 <IconButton
                   sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper', '&:hover': { bgcolor: 'background.paper' }, zIndex: 1 }}
                   onClick={() => handleRemoveFavorite(listing._id)}

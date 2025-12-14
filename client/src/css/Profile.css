@@ -1,0 +1,76 @@
+/* Profile.css */
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+/* Cards */
+.profile-card {
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Card titles */
+.profile-card .MuiTypography-h6 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* Forms */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-form button {
+    background-color: #5c7cfa;
+    color: white;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.profile-form button:hover {
+    background-color: #3b5df5;
+    transform: translateY(-2px);
+}
+
+/* Input fields */
+.profile-form .MuiInputBase-root {
+    border-radius: 8px;
+}
+
+/* Alerts */
+.profile-alert {
+    background-color: #e7f3ff;
+    color: #1e3a8a;
+    border-left: 4px solid #3b82f6;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* Typography tweaks */
+.profile-container h3,
+.profile-container h6 {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 680px) {
+    .profile-container {
+        margin: 1rem;
+    }
+
+    .profile-card {
+        padding: 1rem;
+    }
+}
