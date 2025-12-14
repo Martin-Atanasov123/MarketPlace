@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { seedDatabase } from '@/utils/seedData';
 
 const AuthContext = createContext(undefined);
 
@@ -78,8 +77,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
-      // Seed database with sample data if needed
-      seedDatabase(userData);
       
       toast.success('Welcome back!');
       navigate('/catalog');
@@ -105,8 +102,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
-      // Seed database with sample data if needed
-      seedDatabase(userData);
       
       toast.success('Account created successfully!');
       navigate('/catalog');

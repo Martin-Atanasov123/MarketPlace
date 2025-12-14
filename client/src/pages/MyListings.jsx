@@ -73,7 +73,7 @@ const MyListings = () => {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h3" component="h1" fontWeight="bold">
-          My Listings
+          My Products
         </Typography>
         <Button 
           variant="contained" 
@@ -82,7 +82,7 @@ const MyListings = () => {
           to="/create"
           size="large"
         >
-          New Listing
+          Create New 
         </Button>
       </Box>
 
@@ -90,7 +90,7 @@ const MyListings = () => {
         <Card sx={{ textAlign: 'center', py: 8 }}>
           <CardContent>
             <Typography variant="body1" color="text.secondary" gutterBottom>
-              You haven't posted any listings yet
+              You haven't posted any products yet
             </Typography>
             <Button 
               variant="contained" 
@@ -98,7 +98,7 @@ const MyListings = () => {
               to="/create" 
               sx={{ mt: 2 }}
             >
-              Create Your First Listing
+              Create Your First Post
             </Button>
           </CardContent>
         </Card>

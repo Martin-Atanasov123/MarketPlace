@@ -10,7 +10,7 @@ export const Toast = ({ toast, onClose }) => {
       open={toast.open}
       autoHideDuration={TOAST_DURATION}
       onClose={onClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} 
     >
       <Alert severity={toast.severity} onClose={onClose}>
         {toast.message}
