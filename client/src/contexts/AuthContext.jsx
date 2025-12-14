@@ -11,55 +11,75 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Validate token on mount and refresh
-  useEffect(() => {
-    const validateAndRestoreSession = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          
-          // Verify token is still valid by checking with server
-          if (parsedUser.accessToken) {
-            try {
-              const response = await fetch(`${API_URL}/users/me`, {
-                headers: {
-                  'X-Authorization': parsedUser.accessToken,
-                },
-              });
 
-              if (response.ok) {
-                // Token is valid, restore user
-                const userData = await response.json();
-                setUser({ ...parsedUser, ...userData });
-              } else {
-                // Token is invalid, clear storage
-                console.warn('Access token expired or invalid');
-                localStorage.removeItem('user');
-                setUser(null);
-              }
-            } catch (error) {
-              console.error('Failed to validate token:', error);
-              // On network error, keep user but it might fail on next request
-              setUser(parsedUser);
-            }
-          } else {
-            // No token, clear storage
-            localStorage.removeItem('user');
-            setUser(null);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
+
+  useEffect(() => {
+  const validateAndRestoreSession = async () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) return;
+
+      const parsedUser = JSON.parse(storedUser);
+
+      if (!parsedUser.accessToken) {
         localStorage.removeItem('user');
         setUser(null);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    validateAndRestoreSession();
-  }, []);
+      // NOTE: removed extra curly brace here
+      const url = `${API_URL}/users/${parsedUser._id}`;
+      try {
+        const response = await fetch(url, {
+          headers: { 'X-Authorization': parsedUser.accessToken },
+        });
+
+        // useful debug logs while developing:
+        console.debug('validate token fetch', { url, status: response.status });
+
+        if (!response.ok) {
+          console.warn('Token validation failed, clearing user', response.status);
+          localStorage.removeItem('user');
+          setUser(null);
+          return;
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        // safe handling: only call json() when content-type looks like JSON
+        if (contentType.includes('application/json')) {
+          try {
+            const userData = await response.json();
+            // If server returns empty JSON ({}), merge into parsedUser anyway
+            setUser({ ...parsedUser, ...userData });
+          } catch (parseErr) {
+            // fallback: try text so you can see what server returned
+            const text = await response.text();
+            console.error('Failed to parse JSON from token validation response:', parseErr, 'raw:', text);
+            // decide fallback behavior — keep stored user (optimistic) or clear
+            setUser(parsedUser);
+          }
+        } else {
+          // server returned no JSON (maybe 204) — keep the stored user
+          console.info('Token validated but no JSON returned; keeping stored user');
+          setUser(parsedUser);
+        }
+      } catch (networkErr) {
+        console.error('Network error during token validation:', networkErr);
+        // On network error, conservative choice: keep parsed user (you can force re-login on actual failed requests)
+        setUser(parsedUser);
+      }
+    } catch (error) {
+      console.error('Failed to parse stored user:', error);
+      localStorage.removeItem('user');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  validateAndRestoreSession();
+}, []);
+
 
   const login = async (email, password) => {
     try {

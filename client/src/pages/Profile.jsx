@@ -84,6 +84,29 @@ const Profile = () => {
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 4 }}>
+
+        {/* Account Info */}
+        <Card>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom fontWeight="bold">
+              Account Information
+            </Typography>
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography color="text.secondary">User ID:</Typography>
+                <Typography fontFamily="monospace" fontSize="0.875rem">
+                  {user._id}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography color="text.secondary">Current Email:</Typography>
+                <Typography>{user.email}</Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        
         {/* Email Update */}
         <Card>
           <CardContent sx={{ p: 3 }}>
@@ -158,27 +181,7 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Account Info */}
-        <Card>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight="bold">
-              Account Information
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography color="text.secondary">User ID:</Typography>
-                <Typography fontFamily="monospace" fontSize="0.875rem">
-                  {user._id}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography color="text.secondary">Current Email:</Typography>
-                <Typography>{user.email}</Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+        
       </Box>
 
       <Toast toast={toast} onClose={hideToast} />

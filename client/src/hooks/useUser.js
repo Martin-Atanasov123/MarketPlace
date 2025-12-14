@@ -26,13 +26,15 @@ export const useUser = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/users/me`, {
+      const response = await fetch(`${API_URL}/users/${user._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Authorization': user.accessToken,
         },
         body: JSON.stringify({ email: email.trim() }),
+        
+        
       });
 
       if (!response.ok) {
@@ -43,8 +45,12 @@ export const useUser = () => {
         throw new Error(errorData.message || 'Failed to update email');
       }
 
-      const updatedUserData = await response.json();
-      const updatedUser = { ...user, email: updatedUserData.email };
+      // if (response.status === 204) {
+      //   throw new Error('Email update is not currently supported.');
+      // }
+
+      // const updatedUserData = await response.json();
+      const updatedUser = { ...user, email: email.trim() };
       updateUser(updatedUser);
       return updatedUser;
     } catch (err) {
@@ -72,7 +78,7 @@ export const useUser = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/users/me`, {
+      const response = await fetch(`${API_URL}/users/${user._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

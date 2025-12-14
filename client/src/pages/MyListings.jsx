@@ -106,8 +106,8 @@ const MyListings = () => {
         <Grid container spacing={3}>
           {listings.map((listing) => (
             <Grid item xs={12} sm={6} md={4} key={listing._id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
+              <Card sx={{ height: '100%', width: '1150px',display: 'flex', flexDirection: 'row' }}>
+                <ListingImage  imageUrl={listing.imageUrl} alt={listing.title} />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Chip label={listing.category} size="small" sx={{ mb: 1 }} />
                   <Typography variant="h6" gutterBottom noWrap>
