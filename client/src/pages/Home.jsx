@@ -8,11 +8,11 @@ const Home = () => {
       {/* Hero Section */}
       <Box sx={{ bgcolor: 'primary.light', py: 10 }}>
         <Container maxWidth="lg">
-          <Box textAlign="center">
-            <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
+          <Box textAlign="center" bgcolor="white" p={4} borderRadius={15} boxShadow={3}>
+            <Typography variant="h2" component="h1" gutterBottom fontWeight="bold" >
               Buy & Sell Anything
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 700, mx: 'auto' }}>
+            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 700, mx: 'auto' , }}>
               Your trusted marketplace for electronics, vehicles, real estate, and more.
               Connect with buyers and sellers in your community.
             </Typography>
@@ -40,11 +40,11 @@ const Home = () => {
       </Box>
 
       {/* Features */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Container maxWidth="lg"   sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom fontWeight="bold">
           Why Choose Us
         </Typography>
-        <Grid container spacing={4} sx={{ mt: 2 }}>
+        <Grid container justifyContent="center" spacing={4} sx={{ mt: 2 }}>
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%', textAlign: 'center', p: 2 }}>
               <CardContent>
@@ -132,7 +132,7 @@ const Home = () => {
       <Box sx={{ bgcolor: 'primary.light', py: 8 }}>
         <Container maxWidth="md">
           <Box textAlign="center">
-            <Typography variant="h4" gutterBottom fontWeight="bold">
+            <Typography variant="h3" gutterBottom fontWeight="bold">
               Ready to Get Started?
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>

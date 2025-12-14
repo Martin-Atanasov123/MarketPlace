@@ -56,7 +56,7 @@ const Catalog = () => {
       const data = await fetchListings();
       setListings(data);
     } catch (error) {
-      showToast('Failed to load listings', 'error');
+      showToast('Failed to load products', 'error');
       setListings([]);
     }
   };
@@ -87,7 +87,7 @@ const Catalog = () => {
 
   const toggleLike = (listingId) => {
     if (!user) {
-      showToast('Please login to like listings', 'error');
+      showToast('Please login to like products', 'error');
       return;
     }
 
@@ -118,13 +118,13 @@ const Catalog = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-        Browse Listings
+        Browse Products
       </Typography>
 
       {/* Filters */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap' }}>
         <TextField
-          placeholder="Search listings..."
+          placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{ flexGrow: 1, minWidth: 250 }}
@@ -155,23 +155,23 @@ const Catalog = () => {
       {filteredListings.length === 0 ? (
         <Box textAlign="center" py={6}>
           <Typography variant="body1" color="text.secondary" gutterBottom>
-            No listings found
+            No Products founded
           </Typography>
           {user && (
             <Button variant="contained" component={Link} to="/create" sx={{ mt: 2 }}>
-              Post Your First Ad
+              Post Your First Product
             </Button>
           )}
         </Box>
       ) : (
         <>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             {currentListings.map((listing) => {
               if (!listing || !listing._id) return null;
               const isLiked = user ? isFavorite(user._id, listing._id) : false;
               return (
                 <Grid item xs={12} sm={6} md={6} key={listing._id}>
-                  <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <Card sx={{ height: 'auto', width: '1150px', display: 'flex', flexDirection: 'row' }}>
                     <ListingImage imageUrl={listing.imageUrl} alt={listing.title} />
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
