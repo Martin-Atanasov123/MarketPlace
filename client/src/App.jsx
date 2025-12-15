@@ -27,6 +27,7 @@ const theme = createTheme({
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
   },
 });
+  // console.log('API URL:', import.meta.env.VITE_APP_SERVER_URL);
 
 const App = () => (
   <ErrorBoundary>

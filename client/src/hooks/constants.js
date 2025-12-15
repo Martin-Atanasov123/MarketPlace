@@ -1,5 +1,5 @@
 /**
  * API Configuration Constants
  */
-export const API_URL = 'http://localhost:3030';
+export const API_URL = `${import.meta.env.VITE_APP_SERVER_URL}`;
 
