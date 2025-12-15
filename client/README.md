@@ -1,6 +1,5 @@
 # MarketPlace - React Application
-
-A modern marketplace application built with React, Material-UI, and custom hooks for managing listings, comments, and user interactions.
+ marketplace application built with React, Material-UI, and custom hooks for managing listings, comments, and user interactions.
 
 ## Project Structure
 
