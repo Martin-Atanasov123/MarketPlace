@@ -8,7 +8,7 @@ export default function Footer() {
     return (
         <footer className="footer">
             <div className="footer-main">
-                {/* Brand / About */}
+                {/* Brand  About */}
                 <div className="footer-section footer-about">
                     <h3 className="footer-title">MarketPlace</h3>
                     <p>A modern marketplace for buying and selling listings.</p>
