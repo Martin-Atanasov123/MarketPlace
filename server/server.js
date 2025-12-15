@@ -1373,11 +1373,11 @@
                                     }
                                 }
                                 loadedData[collectionName] = objectData;
-                                console.log(`✓ Loaded ${Object.keys(objectData).length} ${collectionName} from ${file}`);
+                                // console.log(`✓ Loaded ${Object.keys(objectData).length} ${collectionName} from ${file}`);
                             } else if (typeof jsonData === 'object' && jsonData !== null) {
                                 // Already an object, use as is
                                 loadedData[collectionName] = jsonData;
-                                console.log(`✓ Loaded ${Object.keys(jsonData).length} ${collectionName} from ${file}`);
+                                // console.log(`✓ Loaded ${Object.keys(jsonData).length} ${collectionName} from ${file}`);
                             }
                         } catch (err) {
                             console.error(`✗ Error loading ${file}:`, err.message);
@@ -1744,7 +1744,8 @@
 
     const server = http__default['default'].createServer(requestHandler(plugins, services));
 
-    const port = 3030;
+    const port =process.env.PORT || 3030;
+
 
     server.listen(port);
 
